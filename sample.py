@@ -11,7 +11,6 @@ from matplotlib import style
 style.use('ggplot')
 
 # from PyQt5 import QtWidgets
-from PyQt5.QtCore import Qt
 from sampleUI import Ui_Dialog, QtWidgets
 
 # Company source
@@ -53,16 +52,25 @@ class My_Dialog(QtWidgets.QDialog):
         # fill stock id/name into ui.listStock
         self.ui.listStock.addItems(slist)
 
+        # default get last 3 years data
+        today = dt.date.today()
+        start = dt.date(today.year-3, today.month, today.day)
+        self.ui.dateStart.setDate(start)
+        self.ui.dateEnd.setDate(today)
+
+    # Trigger by: ui.listStock.CurrentRowChanged
     def set_stock_id(self):
         listStock = self.ui.listStock
         row = listStock.currentRow()
         text = listStock.item(row).text()
         ui.editStkid.setText(text)
 
+    # Trigger by: ui.listStock.DoubleClicked
     def set_run_stock(self):
         self.set_stock_id()
         self.run_stock()
 
+    # Trigger by: ui.btnRun.clicked
     def run_stock(self):
         text = self.ui.editStkid.text()
         flds = text.split('\t')
@@ -74,15 +82,16 @@ class My_Dialog(QtWidgets.QDialog):
         stkname = ' @ $'.join(flds[1:])
         title = text if stkname == '' else '{} ({})'.format(stkname, stkid)
 
+        date_start = self.ui.dateStart.date().toPyDate()
+        date_end = self.ui.dateEnd.date().toPyDate()
+
         # draw close-price line for the symbol (stkid)
-        today = dt.date.today()
-        start = dt.date(today.year-3, today.month, today.day)
         try:
             if STOCK_SOURCE == 'yahoo':
                 # Yahoo does not like "." in the symbol, so replace "." with "-"
                 stkid = stkid.replace('.', '-')
             self.log('{}> Draw {} ...'.format(STOCK_SOURCE, stkid))
-            quotes = web.DataReader(stkid, STOCK_SOURCE, start, today)
+            quotes = web.DataReader(stkid, STOCK_SOURCE, date_start, date_end)
 
             # close current figure window
             plt.close()
@@ -105,7 +114,10 @@ if __name__ == "__main__":
 
     ui = Ui_Dialog()
     Dialog = My_Dialog(ui)
-    Dialog.setWindowFlags(Dialog.windowFlags() | Qt.WindowStaysOnTopHint)
+
+    ### Windows stays on top
+    # from PyQt5.QtCore import Qt
+    # Dialog.setWindowFlags(Dialog.windowFlags() | Qt.WindowStaysOnTopHint)
 
     ui.setupUi(Dialog)
     Dialog.load_stock_list(URL, FIELDS)
