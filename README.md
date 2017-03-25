@@ -12,7 +12,7 @@ Sample code for Python3, matplotlib &amp; Qt5
 > ![py-qt5-designer-signal-slot](https://cloud.githubusercontent.com/assets/154892/24317561/2f765ed8-1133-11e7-9f10-3368b4ccb267.png)
 
 
-## 【轉換及編碼】
+## 【轉換 ui 及編寫主程式】
 > Designer 表單存入 sample.ui，用 pyuic5 轉換為 python 程式碼
 
     pyuic5 sample.ui > sampleUI.py
